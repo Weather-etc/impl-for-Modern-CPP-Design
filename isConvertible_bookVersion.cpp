@@ -3,7 +3,6 @@
 #include <iostream>
 
 // isConvertible decide if type T can be converted to type U 
-// This convertibility is equal to static_cast()
 template <typename T, typename U>
 struct isConvertible 
 {
@@ -64,11 +63,24 @@ int main() {
   else
     std::cout << "not\n";
 
+  // This will cause a compile-time error
+  /*
   if (isSuperClass(base, inherit1))
     std::cout << "is\n";
   else
     std::cout << "not\n";
+    */
+
+  if (isSuperClass(base, inherit2))
+    std::cout << "is\n";
+  else
+    std::cout << "not\n";
   
+  if (isSuperClass(inherit2, base))
+    std::cout << "is\n";
+  else
+    std::cout << "not\n";
+
   if (isSuperClass(void, int))
     std::cout << "is\n";
   else

@@ -1,13 +1,19 @@
 // Implements chapter 2.7: Detecting Convertibility and Inheritance at Compile Time
+//
 // Use concepts and constrains(since c++20) and static_cast to prevent compiler 
 // report a compile-time error when trying to use isSuperClass(base, inherit1) 
 // in test code
+//
+// GNU ISO C++ uses compiler intrinsic '__is_base_of()':
+//    https://gcc.gnu.org/onlinedocs/libstdc++/latest-doxygen/a00227_source.html
 
 #include <iostream>
 
 template <typename T, typename U>
 concept convertible = requires(T t, U u){
-  static_cast<U>(t);
+  u = t;
+  // static_cast<U>(t);   ERROR! static_cast allows any implicit conversion and 
+  //    its reverse operation
 };
 
 template <typename T, typename U>
@@ -59,7 +65,7 @@ class inherit1 : private base {};
 class inherit2 : public base {};
 
 int main() {
-  if (isSuperClass(void, int))
+  if (isSuperClass(float, int))
     std::cout << "is\n";
   else
     std::cout << "not\n";
@@ -70,6 +76,11 @@ int main() {
     std::cout << "not\n";
   
   if (isSuperClass(base, inherit2))
+    std::cout << "is\n";
+  else
+    std::cout << "not\n";
+
+  if (isSuperClass(inherit2, base))
     std::cout << "is\n";
   else
     std::cout << "not\n";
