@@ -1,4 +1,4 @@
-// Implements chapter 2.7: Detecting Convertibility and Inheritance at Compile Time
+// Implements section 2.7: Detecting Convertibility and Inheritance at Compile Time
 
 #include <iostream>
 

@@ -1,4 +1,4 @@
-// Implements chapter 2.7: Detecting Convertibility and Inheritance at Compile Time
+// Implements section 2.7: Detecting Convertibility and Inheritance at Compile Time
 //
 // Use concepts and constrains(since c++20) and static_cast to prevent compiler 
 // report a compile-time error when trying to use isSuperClass(base, inherit1) 
