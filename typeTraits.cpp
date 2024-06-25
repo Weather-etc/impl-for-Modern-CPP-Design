@@ -1,6 +1,7 @@
 // implementation of section 2.10 Type Traits
 #include <vector>
 #include <iostream>
+#include "isConvertible.h"
 
 struct NullType {};
 struct EmptyType {};
@@ -101,6 +102,7 @@ public:
   typedef TYPELIST_3(float, double, long double) Floats;
 
   enum {isStdUnsignedInt = TL::IndexOf<UnsignedInts, T>::value >= 0};
+  enum {isStdSignedInt = TL::IndexOf<SignedInts, T>::value >= 0};
   enum {isStdIntegral = isStdUnsignedInt || isStdSignedInt ||
     TL::IndexOf<Others, T>::value >= 0};
   enum {isStdFloat = TL::IndexOf<Floats, T>::value >= 0};
@@ -134,7 +136,9 @@ template <typename InIt, typename OutIt>
 OutIt CopyImpl(InIt first, InIt last, OutIt result, Int2Type<Conservative>)
 {
   for (; first != last; ++first, ++result)
-    *result = *first;
+    // If *result is uninitialized, then copy constructor is called, otherwise 
+    // assignment operator will be used.
+    *result = *first;   
   return result;
 }
 // Fast routine works only for pointers to raw data
@@ -143,22 +147,25 @@ OutIt CopyImpl (InIt first, InIt last, OutIt result, Int2Type<Fast>)
 {
   const size_t n = last - first;
   // another impl for copy
-    return result + n;
+  return result + n;
 }
 template <typename InIt, typename OutIt>
 OutIt Copy(InIt first, InIt last, OutIt result)
 {
   typedef typename TypeTraits<InIt>::PointeeType SrcPointee;
   typedef typename TypeTraits<OutIt>::PointeeType DestPointee;
+  // Constrains to use fast routine: same type and bitwise copyable.
   enum {copyAlgo = 
     TypeTraits<InIt>::isPointer &&
     TypeTraits<OutIt>::isPointer &&
+    // Patch for user-define type.
     SupportsBitwiseCopy<SrcPointee>::result &&
     SupportBitwiseCopy<DestPointee>::result &&
-    TypeTraits<SrcPointee>::isStdFundamental &&
-    TypeTraits<DestPointee>::isStdFundamental &&
-    Typetraits<SrcPointee>::isStdFloat == TypeTraits<DestPointee>::isStdFloat &&
-    sizeof(SrcPointee) == sizeof(DestPointee) ? Fast : Conservative};
+    Conversion<SrcPointee, DestPointee>::sameType || (
+      TypeTraits<SrcPointee>::isStdFundamental &&
+      TypeTraits<DestPointee>::isStdFundamental &&
+      Typetraits<SrcPointee>::isStdFloat == TypeTraits<DestPointee>::isStdFloat &&
+      sizeof(SrcPointee) == sizeof(DestPointee)) ? Fast : Conservative};
   return CopyImpl(first, last, result, Int2Type<copyAlgo>());
 }
 
